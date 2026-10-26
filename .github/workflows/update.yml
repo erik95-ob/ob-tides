@@ -1,1 +1,29 @@
 
+name: Update tide calendar
+ 
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # every 6 hours
+  workflow_dispatch:          # lets you run it manually from the Actions tab
+ 
+permissions:
+  contents: write
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests astral
+      - run: python ob_tides.py
+      - name: Commit updated calendar
+        run: |
+          git config user.name "tide-bot"
+          git config user.email "tide-bot@users.noreply.github.com"
+          git add ocean_beach_tides.ics
+          git diff --cached --quiet || git commit -m "Update tide calendar"
+          git push
+ 
